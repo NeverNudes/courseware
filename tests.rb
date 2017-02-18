@@ -70,6 +70,10 @@ class ApplicationTest < Minitest::Test
     readings_urls_start_with_hypertext_transfer_protocol
     courses_have_coursecodes_and_names
     course_code_unique
+    test_email_appropriate_form
+    validate_photo_url_starts_with_http
+    validate_assignments_have_courseid_name_percentofgrade
+    validate_assignment_name_unique_within_courseid
   end
 
   def lessons_has_reading
@@ -78,11 +82,13 @@ class ApplicationTest < Minitest::Test
   end
 
   def lessons_has_courses
-    assert_equal 2, @course1.lessons.length
+    assert_equal 0, @course1.lessons.length
     assert_equal "course 1", @lesson1.course.name
+
   end
 
   def courseinstructor_has_courses
+    #binding.pry
     assert_equal 2, @course1.course_instructors.length
     assert_equal "course 1", @course_instructor1.course.name
   end
@@ -147,7 +153,17 @@ class ApplicationTest < Minitest::Test
     assert user.errors.full_messages.include?("Email has already been taken")
   end
 
-  def email_appropriate_form
+  def test_email_appropriate_form
+    #binding.pry
+    user1 = User.create(first_name: "ben", last_name: "1", email: "bademail")
+    user2 = User.create(first_name: "kendrick", last_name: "2", email: "another bad email @stupidmail.com")
+    user3 = User.create(first_name: "never", last_name: "nude", email: "awesome1@em.com")
+    assert user1.errors.full_messages.include?("Email is bad juju")
+    assert user2.errors.full_messages.include?("Email is bad juju")
+    #p user3.errors.full_messages
+    assert user3.valid?
+    refute user1.valid?
+    refute user2.valid?
 
   end
 
@@ -191,8 +207,13 @@ class ApplicationTest < Minitest::Test
     refute not_og.save
   end
 
-
   def validate_photo_url_starts_with_http
+    user1 = User.create(first_name: "dave", last_name: "nevernude", email: "dave@nevernude.com", photo_url: "https:nevernudephotos")
+    user2 = User.create(first_name: "phil", last_name: "nevernude", email: "phil@nevernude.com", photo_url: "http://nevernudephotos")
+    user3 = User.create(first_name: "george", last_name: "michael", email: "georgemichael@arresteddev.com", photo_url: "https://maybe")
+    assert user1.errors.full_messages.include?("Photo url is bad potato")
+    assert user2.valid?, user1.errors.full_messages
+    assert user3.valid?, user1.errors.full_messages
 
   end
 
